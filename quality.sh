@@ -13,9 +13,14 @@ customDie() {
 # pep8 has been renamed to pycodestyle (GitHub issue #466)
 # Use of the pep8 tool will be removed in a future release.
 # Please install and use `pycodestyle` instead.
-
+PCS_CMD=pycodestyle-3
 if [ ! -f "`command -v pycodestyle-3`" ]; then
-    customDie "pycodestyle-3 is missing. You must first install the python3-pycodestyle package."
+    pycodestyle_version=`python3 -m pycodestyle --version`
+    if [ $? -ne 0 ]; then
+        customDie "pycodestyle-3 is missing ('python3 -m pycodestyle --version' didn't work either). You must first install the python3-pycodestyle package."
+    else
+        PCS_CMD="python3 -m pycodestyle"
+    fi
 fi
 
 tmp_path=style-check-output.txt
@@ -27,11 +32,18 @@ echo > "$tmp_path"
 for name in `ls *.py` `ls gcodesynth/*.py`
 do
     echo "* checking '$name'..."
-    pycodestyle-3 $name  >> "$tmp_path"
+    $PCS_CMD $name  >> "$tmp_path"
 done
 
 if [ -f "`command -v outputinspector`" ]; then
     outputinspector "$tmp_path"
+    if [ $? -ne 0 ]; then
+        echo "* \"$tmp_path\" <<END:"
+        cat "$tmp_path"
+        echo "END"
+        echo "(outputinspector failed)"
+    fi
+    # rm "$tmp_path"
     # sleep 3
 else
     cat "$tmp_path"
