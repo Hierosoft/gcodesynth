@@ -6,14 +6,33 @@ import os
 
 myDir = os.path.dirname(os.path.realpath(__file__))
 repoDir = myDir
+moduleDir = os.path.join(repoDir, "gcodesynth")
 try:
-    from octoprint_gcodesynth.gcodecommand import GCodeCommand
+    import gcodesynth
+    # ^ Assert that this isn't the repo directory (The repo isn't a
+    #   module, so the script will stop here if the PATH is wrong).
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        repoDir = os.path.dirname(repoDir)
+    moduleDir = os.path.join(repoDir, "gcodesynth")
+    sys.path.insert(0, repoDir)
+    from gcodesynth.gcodecommand import GCodeCommand
 except ImportError as ex:
-    print(str(ex))
+    print("[gcodesynth] adjusting paths due to " + str(ex))
     repoDir = os.path.dirname(myDir)
-    sys.path.append(repoDir)
-    print("Trying from \"{}\"...".format(repoDir))
-    from octoprint_gcodesynth.gcodecommand import GCodeCommand
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        repoDir = os.path.dirname(repoDir)
+        print("[gcodecommand] automatically changed repoDir to {}"
+              "".format(repoDir))
+
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        raise RuntimeError("[gcodesynth] gcodesynth wasn't in \"{}\""
+                          "".format(repoDir))
+    moduleDir = os.path.join(repoDir, "gcodesynth")
+    sys.path.insert(0, repoDir)
+    sys.stderr.write("[gcodesynth] trying from \"{}\"..."
+                     "".format(repoDir))
+    from gcodesynth.gcodecommand import GCodeCommand
+    sys.stderr.write("OK\n")
 
 
 

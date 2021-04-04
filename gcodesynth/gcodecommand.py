@@ -4,14 +4,33 @@ import sys
 
 myDir = os.path.dirname(os.path.realpath(__file__))
 repoDir = myDir
+moduleDir = os.path.join(repoDir, "gcodesynth")
 try:
-    from octoprint_gcodesynth.gcodeparam import GCodeParam
+    import gcodesynth
+    # ^ Assert that this isn't the repo directory (The repo isn't a
+    #   module, so the script will stop here if the PATH is wrong).
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        repoDir = os.path.dirname(repoDir)
+    moduleDir = os.path.join(repoDir, "gcodesynth")
+    sys.path.insert(0, repoDir)
+    from gcodesynth.gcodeparam import GCodeParam
 except ImportError as ex:
-    print(str(ex))
+    print("[gcodecommand] adjusting paths due to " + str(ex))
     repoDir = os.path.dirname(myDir)
-    sys.path.append(repoDir)
-    print("Trying from \"{}\"...".format(repoDir))
-    from octoprint_gcodesynth.gcodeparam import GCodeParam
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        repoDir = os.path.dirname(repoDir)
+        print("[gcodecommand] automatically changed repoDir to {}"
+              "".format(repoDir))
+
+    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+        raise RuntimeError("[gcodecommand] gcodesynth wasn't in \"{}\""
+                          "".format(repoDir))
+    moduleDir = os.path.join(repoDir, "gcodesynth")
+    sys.path.insert(0, repoDir)
+    sys.stderr.write("[gcodecommand] trying from \"{}\"..."
+                     "".format(repoDir))
+    from gcodesynth.gcodeparam import GCodeParam
+    sys.stderr.write("OK\n")
 
 
 
@@ -135,7 +154,8 @@ class GCodeCommand():
         if len(self._params) < 1:
             raise RuntimeError("There was no command during play.")
         if len(self._params) < 2:
-            raise RuntimeError("There were no params during play.")
+            raise RuntimeError("There were no params during play"
+                               " \"\"".format(str(self)))
         cmd = self._params[0]
         if cmd._n != "M":
             return
@@ -172,6 +192,6 @@ class GCodeCommand():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        gc = GCodeCommand(sys.argv[1])
+        gc = GCodeCommand(" ".join(sys.argv[1:]))
         gc.play()
 

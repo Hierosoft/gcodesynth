@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from octoprint_gcodesynth.gcodesynth import GCodeSynth
+from gcodesynth.gcodesynth import GCodeSynth
 
 
 gs = GCodeSynth()
