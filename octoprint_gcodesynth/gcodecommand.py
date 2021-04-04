@@ -45,14 +45,14 @@ class GCodeCommand():
     def __init__(self, gcodeStr):
         '''
         Sequential arguments:
-        gcodeStr -- a line of G-code (see fromLine), otherwise None.
+        gcodeStr -- a line of G-code (see loadLine), otherwise None.
         '''
         self._ready = False
         # self._command = None
         self._params = []
         self._comment = None
         if gcodeStr is not None:
-            self.fromLine(gcodeStr)
+            self.loadLine(gcodeStr)
 
     def getCommand(self):
         if len(self._params) < 1:
@@ -64,7 +64,7 @@ class GCodeCommand():
             return None
         return str(self.getCommand())
 
-    def fromLine(self, gcodeStr):
+    def loadLine(self, gcodeStr):
         '''
         gcodeStr -- a line of G-code
         '''
@@ -166,6 +166,12 @@ class GCodeCommand():
         raise KeyError("There was no param '{}' in \"{}\""
                        "".format(char, str(self)))
 
-
     def __str__(self):
         return self.__repr__()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        gc = GCodeCommand(sys.argv[1])
+        gc.play()
+

@@ -22,11 +22,17 @@ class GCodeSynth():
         self._commands = []
 
     def pushLine(self, gcodeStr):
-        self._commands.append(GCodeCommand(gcodeStr))
+        self._commands.append(GCodeCommand(gcodeStr.rstrip("\n\r")))
 
     def dump(self):
         for cmd in self._commands:
             print(cmd)
+
+    def load(self, path):
+        with open(path, 'r') as ins:
+            for rawL in ins:
+                self.pushLine(rawL)
+                # ^ does rstrip("\n\r")
 
     def play(self):
         for cmd in self._commands:
@@ -34,8 +40,11 @@ class GCodeSynth():
                 continue
             cmd.play()
 
+
 if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        raise ValueError("Provide either 1 (file) or 0 argument(s).")
     if len(sys.argv) > 1:
         gs = GCodeSynth()
-        gs.pushLine(" ".join(sys.argv[1:]))
+        gs.load(sys.argv[1])
         gs.play()
