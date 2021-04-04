@@ -1,6 +1,8 @@
 # gcodesynth
 Play back G-code M300 music in Python 3 using audiogen_p3!
 
+The actual codes are M-codes in this case.
+
 
 ## Install
 (tested on Debian 10 Buster)
@@ -9,6 +11,12 @@ Play back G-code M300 music in Python 3 using audiogen_p3!
 # ^ (optional) The command for the Python 3 version is `pip3-autoremove`.
 sudo apt install -y libportaudiocpp0 portaudio19-dev
 python3 -m pip install https://github.com/rguisewite/audiogen_p3/archive/refs/heads/master.zip
+mkdir -p ~/git
+if [ ! -d ~/git/gcodesynth ]; then
+    git clone https://github.com/poikilos/gcodesynth.git ~/git/gcodesynth
+else
+    cd ~/git/gcodesynth && git pull
+fi
 ```
 
 
