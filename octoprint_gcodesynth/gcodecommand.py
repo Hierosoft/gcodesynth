@@ -1,6 +1,19 @@
 #!/usr/bin/env python
+import os
+import sys
 
-from octoprint_gcodesynth.gcodeparam import GCodeParam
+myDir = os.path.dirname(os.path.realpath(__file__))
+repoDir = myDir
+try:
+    from octoprint_gcodesynth.gcodeparam import GCodeParam
+except ImportError as ex:
+    print(str(ex))
+    repoDir = os.path.dirname(myDir)
+    sys.path.append(repoDir)
+    print("Trying from \"{}\"...".format(repoDir))
+    from octoprint_gcodesynth.gcodeparam import GCodeParam
+
+
 
 enable_audiogen = False
 try:
@@ -13,6 +26,9 @@ except ImportError:
     except ImportError:
         pass
 print("enable_audiogen={}".format(enable_audiogen))
+if not enable_audiogen:
+    print("* audiogen is not available in your installation of Python"
+          " {}".format(sys.version))
 
 class GCodeCommand():
     '''

@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 
-from octoprint_gcodesynth.gcodecommand import GCodeCommand
+import sys
+import os
+
+
+myDir = os.path.dirname(os.path.realpath(__file__))
+repoDir = myDir
+try:
+    from octoprint_gcodesynth.gcodecommand import GCodeCommand
+except ImportError as ex:
+    print(str(ex))
+    repoDir = os.path.dirname(myDir)
+    sys.path.append(repoDir)
+    print("Trying from \"{}\"...".format(repoDir))
+    from octoprint_gcodesynth.gcodecommand import GCodeCommand
+
+
 
 class GCodeSynth():
     def __init__(self):
@@ -18,3 +33,9 @@ class GCodeSynth():
             if cmd.isComment():
                 continue
             cmd.play()
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        gs = GCodeSynth()
+        gs.pushLine(" ".join(sys.argv[1:]))
+        gs.play()
