@@ -50,8 +50,14 @@ def play_8bit_sine(frequency, length=1, sample_rate=44100):
 
     # Generate sine wave
     for x in range(frames_total):
+        if frequency > 0:
+            value = x / ((sample_rate/frequency)/math.pi)
+        else:
+            value = 0
+            # If frequency is 0, flatten waveform instead of raising
+            #   ZeroDivisionError.
         wavedata += (
-            chr(round(math.sin(x/((sample_rate/frequency)/math.pi))*127+128))
+            chr(round(math.sin(value)*127+128))
         )
         # ^ round seems to improve the audio slightly at 8 bit
         #   regardless of sample rate, but more apparent at lower sample rates
