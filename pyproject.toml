@@ -24,3 +24,4 @@ dependencies = [
 
 [project.scripts]
 gcodesynth = "gcodesynth.playgcode:main"
+gcodesynth-line = "gcodesynth.gcodecommand:main"
