@@ -22,6 +22,16 @@ fi
 ```
 
 
+## Use
+Try it out:
+- Change to directory as shown in "Install" steps above.
+- Download a gcode file such as found on a web search of: M300 music example
+- Open a terminal (or Windows Command Prompt if you manage to get pyaudio installed)
+- Run `python3 gcodesynth/playgcode.py $HOME\Downloads\something.gcode`
+  (but change `$HOME\Downloads\something.gcode` to the file you downloaded.
+  - Except if you are able to install using `cd ~/git && pip install --user gcodesynth`: then you can just use the `gcodesynth` command from any location instead of `cd ~/git/gcodesynth` and `python3 gcodesynth/playgcode.py`
+
+
 ## Developer Notes
 See also [did_not_work.md][doc/development/did_not_work.md]
 
