@@ -25,9 +25,9 @@ class TestGcodeSynth(unittest.TestCase):
 
     def test_play_8bit_sine(self):
         print("A4")
-        play_8bit_sine(SCALES['A440']['A 4'])
+        play_8bit_sine(SCALES['A440']['A 4'], length=.25)
         print("C4")
-        play_8bit_sine(SCALES['A440']['C 4'])
+        play_8bit_sine(SCALES['A440']['C 4'], length=.25)
         print("C3")
         play_8bit_sine(SCALES['A440']['C 3'])
         print("done")
