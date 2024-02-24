@@ -2,119 +2,121 @@
 import os
 import sys
 
-myDir = os.path.dirname(os.path.realpath(__file__))
-repoDir = myDir
-moduleDir = os.path.join(repoDir, "gcodesynth")
+MY_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_DIR = MY_DIR
+MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
 try:
     import gcodesynth
     # ^ Assert that this isn't the repo directory (The repo isn't a
     #   module, so the script will stop here if the PATH is wrong).
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
-        repoDir = os.path.dirname(repoDir)
-    moduleDir = os.path.join(repoDir, "gcodesynth")
-    sys.path.insert(0, repoDir)
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
+        REPO_DIR = os.path.dirname(REPO_DIR)
+    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
+    sys.path.insert(0, REPO_DIR)
     from gcodesynth.gcodeparam import GCodeParam
 except ImportError as ex:
     print("[gcodecommand] adjusting paths due to " + str(ex))
-    repoDir = os.path.dirname(myDir)
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
-        repoDir = os.path.dirname(repoDir)
-        print("[gcodecommand] automatically changed repoDir to {}"
-              "".format(repoDir))
+    REPO_DIR = os.path.dirname(MY_DIR)
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
+        REPO_DIR = os.path.dirname(REPO_DIR)
+        print("[gcodecommand] automatically changed REPO_DIR to {}"
+              "".format(REPO_DIR))
 
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
         raise RuntimeError("[gcodecommand] gcodesynth wasn't in \"{}\""
-                          "".format(repoDir))
-    moduleDir = os.path.join(repoDir, "gcodesynth")
-    sys.path.insert(0, repoDir)
+                           "".format(REPO_DIR))
+    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
+    sys.path.insert(0, REPO_DIR)
     sys.stderr.write("[gcodecommand] trying from \"{}\"..."
-                     "".format(repoDir))
+                     "".format(REPO_DIR))
     from gcodesynth.gcodeparam import GCodeParam
     sys.stderr.write("OK\n")
 
 
-
-enable_audiogen = False
+ENABLE_AUDIOGEN = False
 try:
     import audiogen_p3 as audiogen
-    enable_audiogen = True
+    ENABLE_AUDIOGEN = True
 except ImportError:
     try:
         import audiogen
-        enable_audiogen = True
+        ENABLE_AUDIOGEN = True
     except ImportError:
         pass
-print("enable_audiogen={}".format(enable_audiogen))
-if not enable_audiogen:
+print("ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
+if not ENABLE_AUDIOGEN:
     print("* audiogen is not available in your installation of Python"
           " {}".format(sys.version))
 
+
 class GCodeCommand():
     '''
-    Members:
-    _ready -- Is it ready?
-    _command -- (deprecated)
-                It is a command if present (but params are in _params).
-    _params -- This is a list of GCodeParam objects. The first is the
-               command such as M300.
-    _comments -- The comment at the end of the line (If _ready is True
-                 and getCommand is None, the line is only a comment).
+    Attributes:
+        _ready (bool): Is it ready?
+        _command (str): (deprecated) It is a command if present (but
+            params are in _params).
+        _params (list[GCodeParam]): This is a list of GCodeParam
+            objects. The first is the command such as M300.
+        _comment (str): The comment at the end of the line (If _ready is
+            True and get_command is None, the line is only a comment).
     '''
 
-    def __init__(self, gcodeStr):
+    def __init__(self, gcode_raw):
         '''
         Sequential arguments:
-        gcodeStr -- a line of G-code (see loadLine), otherwise None.
+        gcode_raw -- a line of G-code (see load_line), otherwise None.
         '''
         self._ready = False
         # self._command = None
         self._params = []
         self._comment = None
-        if gcodeStr is not None:
-            self.loadLine(gcodeStr)
+        if gcode_raw is not None:
+            self.load_line(gcode_raw)
 
-    def getCommand(self):
+    def get_command(self):
         if len(self._params) < 1:
             return None
         return self._params[0]
 
-    def getCommandStr(self):
+    def get_command_str(self):
         if len(self._params) < 1:
             return None
-        return str(self.getCommand())
+        return str(self.get_command())
 
-    def loadLine(self, gcodeStr):
+    def load_line(self, gcode_raw):
         '''
-        gcodeStr -- a line of G-code
+        Args:
+            gcode_raw (str): a line of G-code (may contain newline
+                character(s))
         '''
-        if not isinstance(gcodeStr, str):
+        if not isinstance(gcode_raw, str):
             raise ValueError("A string is required.")
         if self._ready:
             raise RuntimeError("The GCodeCommand was already loaded.")
         if len(self._params) > 0:
             raise RuntimeError("The params were already loaded.")
-        gcodeStrip = gcodeStr.strip()
-        if gcodeStrip.startswith("//") or gcodeStrip.startswith(";"):
+        gcode = gcode_raw.strip()
+        if gcode.startswith("//") or gcode.startswith(";"):
             self._command = None
-            self._comment = gcodeStr
+            self._comment = gcode_raw
             self._ready = True
             return
-        commentI1 = gcodeStr.find("//")
-        commentI2 = gcodeStr.find(";")
-        commentI = -1
-        if (commentI1 > -1) and (commentI2 > -1):
-            commentI = commentI1 if commentI1 < commentI2 else commentI2
-        elif commentI1 > -1:
-            commentI = commentI1
-        elif commentI2 > -1:
-            commentI = commentI2
-        if commentI > -1:
-            gcodeStrip = gcodeStr[:commentI].strip()
+        comment_i1 = gcode_raw.find("//")
+        comment_i2 = gcode_raw.find(";")
+        comment_i = -1
+        if (comment_i1 > -1) and (comment_i2 > -1):
+            comment_i = comment_i1 if comment_i1 < comment_i2 else comment_i2
+        elif comment_i1 > -1:
+            comment_i = comment_i1
+        elif comment_i2 > -1:
+            comment_i = comment_i2
+        if comment_i > -1:
+            gcode = gcode_raw[:comment_i].strip()
 
-        if ("(" in gcodeStrip) or (">" in gcodeStrip):
+        if ("(" in gcode) or (">" in gcode):
             raise ValueError("inter-line comments are not implemented")
 
-        parts = gcodeStrip.split()
+        parts = gcode.split()
         for i in range(len(parts)):
             part = parts[i]
             self._params.append(GCodeParam(part))
@@ -124,7 +126,7 @@ class GCodeCommand():
     def __repr__(self):
         if not self._ready:
             raise RuntimeError("The command was used before ready.")
-        s = self.getCommandStr()
+        s = self.get_command_str()
         if self._comment is not None:
             if s is None:
                 return self._comment
@@ -141,13 +143,13 @@ class GCodeCommand():
             s += self._comment
         return s
 
-    def isComment(self):
+    def is_comment(self):
         return (self._comment is not None) and (len(self._params) < 1)
 
     def play(self):
         if not self._ready:
             raise RuntimeError("The command was played before ready.")
-        if self.isComment():
+        if self.is_comment():
             print("You tried to play a comment: {}"
                   "".format(self._comment))
             return
@@ -161,21 +163,21 @@ class GCodeCommand():
             return
         if cmd._v != 300:
             return
-        ms = self.getValue("P")
-        Hz = self.getValue("S")
-        print("* play {}ms {}Hz".format(ms, Hz))
-        if not enable_audiogen:
-            print("  enable_audiogen={}".format(enable_audiogen))
+        ms = self.get_value("P")
+        hz = self.get_value("S")
+        print("* play {}ms {}Hz".format(ms, hz))
+        if not ENABLE_AUDIOGEN:
+            print("  ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
             return
         audiogen.sampler.play(audiogen.beep(
-            frequency=Hz,
+            frequency=hz,
             seconds=float(ms)/1000,
         ))
 
-    def getValue(self, char):
-        return self.getParam(char)._v
+    def get_value(self, char):
+        return self.get_param(char)._v
 
-    def getParam(self, char):
+    def get_param(self, char):
         if len(char) != 1:
             raise ValueError("Only one character was expected.")
         for i in range(1, len(self._params)):
@@ -194,4 +196,3 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         gc = GCodeCommand(" ".join(sys.argv[1:]))
         gc.play()
-

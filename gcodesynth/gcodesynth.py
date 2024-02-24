@@ -3,45 +3,43 @@
 import sys
 import os
 
-
-myDir = os.path.dirname(os.path.realpath(__file__))
-repoDir = myDir
-moduleDir = os.path.join(repoDir, "gcodesynth")
+MY_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_DIR = MY_DIR
+MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
 try:
     import gcodesynth
     # ^ Assert that this isn't the repo directory (The repo isn't a
     #   module, so the script will stop here if the PATH is wrong).
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
-        repoDir = os.path.dirname(repoDir)
-    moduleDir = os.path.join(repoDir, "gcodesynth")
-    sys.path.insert(0, repoDir)
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
+        REPO_DIR = os.path.dirname(REPO_DIR)
+    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
+    sys.path.insert(0, REPO_DIR)
     from gcodesynth.gcodecommand import GCodeCommand
 except ImportError as ex:
     print("[gcodesynth] adjusting paths due to " + str(ex))
-    repoDir = os.path.dirname(myDir)
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
-        repoDir = os.path.dirname(repoDir)
-        print("[gcodecommand] automatically changed repoDir to {}"
-              "".format(repoDir))
+    REPO_DIR = os.path.dirname(MY_DIR)
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
+        REPO_DIR = os.path.dirname(REPO_DIR)
+        print("[gcodecommand] automatically changed REPO_DIR to {}"
+              "".format(REPO_DIR))
 
-    if not os.path.isdir(os.path.join(repoDir, "gcodesynth")):
+    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
         raise RuntimeError("[gcodesynth] gcodesynth wasn't in \"{}\""
-                          "".format(repoDir))
-    moduleDir = os.path.join(repoDir, "gcodesynth")
-    sys.path.insert(0, repoDir)
+                           "".format(REPO_DIR))
+    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
+    sys.path.insert(0, REPO_DIR)
     sys.stderr.write("[gcodesynth] trying from \"{}\"..."
-                     "".format(repoDir))
+                     "".format(REPO_DIR))
     from gcodesynth.gcodecommand import GCodeCommand
     sys.stderr.write("OK\n")
-
 
 
 class GCodeSynth():
     def __init__(self):
         self._commands = []
 
-    def pushLine(self, gcodeStr):
-        self._commands.append(GCodeCommand(gcodeStr.rstrip("\n\r")))
+    def push_line(self, gcode):
+        self._commands.append(GCodeCommand(gcode.rstrip("\n\r")))
 
     def dump(self):
         for cmd in self._commands:
@@ -49,13 +47,13 @@ class GCodeSynth():
 
     def load(self, path):
         with open(path, 'r') as ins:
-            for rawL in ins:
-                self.pushLine(rawL)
+            for _raw in ins:
+                self.push_line(_raw)
                 # ^ does rstrip("\n\r")
 
     def play(self):
         for cmd in self._commands:
-            if cmd.isComment():
+            if cmd.is_comment():
                 continue
             cmd.play()
 

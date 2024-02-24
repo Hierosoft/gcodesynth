@@ -3,28 +3,30 @@
 
 class GCodeParam():
     '''
-    Members:
-    _v -- the value (converted to int, but if not possible, to float,
-          or as a last resort, string)
-    _n -- the name
+    Attributes:
+        _v (Union[int,float,str]): the value (converted to int, but if
+            not possible, to float, or as a last resort, string)
+        _n (str): the name
     '''
 
     def __init__(self, chunk):
-        '''
-        Sequential arguments:
-        chunk -- A param string (see setFromChunk) or None.
+        '''Load a chunk as the param.
+
+        Args:
+            chunk (str): A param string (see load) or None.
         '''
         self._ready = False
         self._n = None
         self._v = None
         if chunk is not None:
-            self.setFromChunk(chunk)
+            self.load(chunk)
 
-    def setFromChunk(self, chunk):
-        '''
-        Sequential arguments:
-        chunk -- The param string such as S300 (or a command such as
-                 M300)
+    def load(self, chunk):
+        '''Load a chunk as the param.
+
+        Args:
+            chunk (str): The param string such as S300 (or a command
+                such as M300).
         '''
         if not isinstance(chunk, str):
             raise ValueError("A string param is required.")
