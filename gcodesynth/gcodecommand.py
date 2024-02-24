@@ -30,10 +30,11 @@ except ImportError:
         ENABLE_AUDIOGEN = True
     except ImportError:
         pass
-print("ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
+# print("ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
 if not ENABLE_AUDIOGEN:
-    print("* audiogen is not available in your installation of Python"
-          " {}".format(sys.version))
+    pass
+    # print("* audiogen is not available in your installation of Python"
+    #       " {}".format(sys.version))
 
 def echo0(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -158,31 +159,38 @@ class GCodeCommand():
     def is_comment(self):
         return (self._comment is not None) and (len(self._params) < 1)
 
+    def is_blank(self):
+        '''Return whether this is not a command.
+        The command is first param, so blank only if nothing in _params.
+        '''
+        return not self._params
+
     def play(self, log_level=0):
         if not self._ready:
             raise RuntimeError("The command was played before ready.")
         if self.is_comment():
             print("You tried to play a comment: {}"
                   "".format(self._comment))
-            return
+            return False
         if len(self._params) < 1:
-            raise RuntimeError("There was no command during play.")
+            echo0("Warning: tried to play a blank command")
+            return False
         if len(self._params) < 2:
             raise RuntimeError("There were no params during play"
                                " \"{}\"".format(str(self)))
         cmd = self._params[0]
         if cmd._n != "M":
-            return
+            return False
         if cmd._v != 300:
-            return
+            return False
         # See <https://marlinfw.org/docs/gcode/M300.html>
         ms = 1  # default is 1 millisecond as per Marlin G-code docs
         if self.has_param('P'):  # P is ms *not* pitch
             ms = self.get_value('P')
         else:
-            if log_level > 0:
-                echo0("There is no P (ms). Defaulting to {}"
-                      "".format(ms))
+            # if log_level > 0:
+            echo0("Warning: inaudible (Defaulting to {}ms"
+                  ", P not specified)".format(ms))
         hz = 260  # default is 260 as per Marlin G-code docs
         if self.has_param('S'):
             hz = self.get_value('S')  # S is Hz *not* ms
@@ -195,11 +203,12 @@ class GCodeCommand():
                 length=float(ms)/1000,
                 log_level=log_level,
             )
-            return
+            return True
         audiogen.sampler.play(audiogen.beep(
             frequency=hz,
             seconds=float(ms)/1000,
         ))
+        return True
 
     def get_value(self, char):
         return self.get_param(char)._v
@@ -225,9 +234,27 @@ class GCodeCommand():
         return self.__repr__()
 
 
-if __name__ == "__main__":
+def usage():
+    echo0(__doc__)
+
+
+def main():
     if len(sys.argv) > 1:
         start()
         gc = GCodeCommand(" ".join(sys.argv[1:]))
-        gc.play()
+        played = gc.play()
         stop()
+        if not played:
+            usage()
+            echo0("Error: There was no playable M300 command.")
+            return 1
+    else:
+        usage()
+        echo0("Error: There was no M300 command specified.")
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

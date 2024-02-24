@@ -12,6 +12,9 @@ if __name__ == "__main__":
 
 from gcodesynth import GCodeSynth
 
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 
 class TestGCodeSynth(unittest.TestCase):
     gs = None
@@ -35,10 +38,26 @@ class TestGCodeSynth(unittest.TestCase):
     def test_m300_file(self):
         log_level = 1
         cls = TestGCodeSynth
-        path = os.path.join(TEST_DATA_DIR, "with_comments.gcode")
+        name = "with_comments.gcode"
+        path = os.path.join(TEST_DATA_DIR, name)
         cls.gs.clear()
         cls.gs.load(path)
-        cls.gs.play(log_level=log_level)
+        missed = cls.gs.play(log_level=log_level)
+        echo0("{} unplayable line(s) in {}".format(missed, name))
+
+    def test_blank_lines(self):
+        log_level = 1
+        cls = TestGCodeSynth
+        name = "combine_1ms_tones.gcode"
+        path = os.path.join(TEST_DATA_DIR, name)
+        cls.gs.clear()
+        cls.gs.load(path)
+        missed = cls.gs.play(log_level=log_level)
+        if missed > 0:
+            echo0("{} unplayable line(s) in {}".format(missed, name))
+            echo0("  (Should be 0 since play should not even try to play"
+                  " lines that have no command)")
+        self.assertEqual(missed, 0)
 
     @classmethod
     def tearDownClass(cls):

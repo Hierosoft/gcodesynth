@@ -31,10 +31,15 @@ class GCodeSynth():
                 # ^ does rstrip("\n\r")
 
     def play(self, log_level=0):
+        missed = 0
         for cmd in self._commands:
             if cmd.is_comment():
                 continue
-            cmd.play(log_level=log_level)
+            if cmd.is_blank():
+                continue
+            if not cmd.play(log_level=log_level):
+                missed += 1
+        return missed
 
 
 if __name__ == "__main__":
