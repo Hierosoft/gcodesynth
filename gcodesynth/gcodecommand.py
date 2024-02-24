@@ -180,7 +180,7 @@ class GCodeCommand():
             raise RuntimeError("There was no command during play.")
         if len(self._params) < 2:
             raise RuntimeError("There were no params during play"
-                               " \"\"".format(str(self)))
+                               " \"{}\"".format(str(self)))
         cmd = self._params[0]
         if cmd._n != "M":
             return
