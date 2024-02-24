@@ -2,37 +2,7 @@
 import os
 import sys
 
-
-MY_DIR = os.path.dirname(os.path.realpath(__file__))
-REPO_DIR = MY_DIR
-MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
-try:
-    import gcodesynth
-    # ^ Assert that this isn't the repo directory (The repo isn't a
-    #   module, so the script will stop here if the PATH is wrong).
-    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
-        REPO_DIR = os.path.dirname(REPO_DIR)
-    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
-    sys.path.insert(0, REPO_DIR)
-    from gcodesynth.gcodeparam import GCodeParam
-except ImportError as ex:
-    print("[gcodecommand] adjusting paths due to " + str(ex))
-    REPO_DIR = os.path.dirname(MY_DIR)
-    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
-        REPO_DIR = os.path.dirname(REPO_DIR)
-        print("[gcodecommand] automatically changed REPO_DIR to {}"
-              "".format(REPO_DIR))
-
-    if not os.path.isdir(os.path.join(REPO_DIR, "gcodesynth")):
-        raise RuntimeError("[gcodecommand] gcodesynth wasn't in \"{}\""
-                           "".format(REPO_DIR))
-    MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
-    sys.path.insert(0, REPO_DIR)
-    sys.stderr.write("[gcodecommand] trying from \"{}\"..."
-                     "".format(REPO_DIR))
-    from gcodesynth.gcodeparam import GCodeParam
-    sys.stderr.write("OK\n")
-
+from gcodesynth.gcodeparam import GCodeParam
 
 ENABLE_AUDIOGEN = False
 try:
@@ -78,8 +48,9 @@ class GCodeCommand():
 
     def __init__(self, gcode_raw):
         '''
-        Sequential arguments:
-        gcode_raw -- a line of G-code (see load_line), otherwise None.
+        Args:
+            gcode_raw (str): a line of G-code (see load_line), otherwise
+                None.
         '''
         self._ready = False
         # self._command = None

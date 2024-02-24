@@ -21,3 +21,6 @@ requires-python = ">= 3.4"
 dependencies = [
     "pyaudio",
 ]
+
+[project.scripts]
+gcodesynth = "gcodesynth.playgcode:main"

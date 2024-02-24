@@ -17,7 +17,7 @@ from gcodesynth.gcspyaudio import (
 from gcodesynth.scales import SCALES
 
 
-class TestGcodeSynth(unittest.TestCase):
+class TestGCodeSynth(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
