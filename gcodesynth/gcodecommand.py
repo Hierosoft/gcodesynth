@@ -193,7 +193,7 @@ class GCodeCommand():
             # print("  ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
             play_8bit_sine(
                 hz,
-                float(ms)/1000,
+                length=float(ms)/1000,
             )
             return
         audiogen.sampler.play(audiogen.beep(

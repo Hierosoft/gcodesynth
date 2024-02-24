@@ -40,24 +40,25 @@ def play_8bit_sine(frequency, length=1, sample_rate=44100):
     '''
     # Based on https://stackoverflow.com/a/33880295/4541104 by Liam
     # accessed May 30, 2022
-    length = 1  # seconds to play sound
 
-    sample_rate = max(sample_rate, frequency+100)
+    # sample_rate = max(sample_rate, frequency+100)
+    # ^ This would help detail but subvert the caller's value
 
-    frames_total = int(sample_rate * length)
-    frames_remainder = frames_total % sample_rate
+    frames_total = int(float(sample_rate) * length)
+    # frames_remainder = frames_total % sample_rate
     wavedata = ''
 
-    # generating wawes
+    # Generate sine wave
     for x in range(frames_total):
         wavedata += (
             chr(round(math.sin(x/((sample_rate/frequency)/math.pi))*127+128))
         )
         # ^ round seems to improve the audio slightly at 8 bit
         #   regardless of sample rate, but more apparent at lower sample rates
+    print("{} samples".format(frames_total))
 
-    for x in range(frames_remainder):
-        wavedata += chr(128)
+    # for x in range(frames_remainder):
+    #     wavedata += chr(128)
 
     try:
         stream = p.open(format=p.get_format_from_width(1),
