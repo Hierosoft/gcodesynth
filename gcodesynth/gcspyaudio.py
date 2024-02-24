@@ -28,7 +28,7 @@ def stop():
     p = None
 
 
-def play_8bit_sine(frequency, length=1, sample_rate=44100):
+def play_8bit_sine(frequency, length=1, sample_rate=44100, log_level=0):
     '''Play a note at 8 bit sample resolution.
     8-bit is the "vertical" detail (256 levels in the case of 8-bit),
     whereas sample_rate is the timewise detail.
@@ -37,6 +37,7 @@ def play_8bit_sine(frequency, length=1, sample_rate=44100):
         frequency (float): Hz, waves per second, 261.63=C4-note.
         length (float): seconds to play sound
         sample_rate (int): The number of samples per second.
+        log_level (int): If >0, show # of samples written to sound card.
     '''
     # Based on https://stackoverflow.com/a/33880295/4541104 by Liam
     # accessed May 30, 2022
@@ -61,7 +62,8 @@ def play_8bit_sine(frequency, length=1, sample_rate=44100):
         )
         # ^ round seems to improve the audio slightly at 8 bit
         #   regardless of sample rate, but more apparent at lower sample rates
-    print("{} samples".format(frames_total))
+    if log_level > 0:
+        print("{} samples".format(frames_total))
 
     # for x in range(frames_remainder):
     #     wavedata += chr(128)

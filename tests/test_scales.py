@@ -24,12 +24,13 @@ class TestGCodeSynth(unittest.TestCase):
         start()
 
     def test_play_8bit_sine(self):
+        log_level = 1
         print("A4")
-        play_8bit_sine(SCALES['A440']['A 4'], length=.25)
+        play_8bit_sine(SCALES['A440']['A 4'], length=.25, log_level=log_level)
         print("C4")
-        play_8bit_sine(SCALES['A440']['C 4'], length=.25)
+        play_8bit_sine(SCALES['A440']['C 4'], length=.25, log_level=log_level)
         print("C3")
-        play_8bit_sine(SCALES['A440']['C 3'])
+        play_8bit_sine(SCALES['A440']['C 3'], log_level=log_level)
         print("done")
 
     @classmethod

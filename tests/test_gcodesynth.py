@@ -33,11 +33,12 @@ class TestGCodeSynth(unittest.TestCase):
         cls.gs.play()
 
     def test_m300_file(self):
+        log_level = 1
         cls = TestGCodeSynth
         path = os.path.join(TEST_DATA_DIR, "with_comments.gcode")
         cls.gs.clear()
         cls.gs.load(path)
-        cls.gs.play()
+        cls.gs.play(log_level=log_level)
 
     @classmethod
     def tearDownClass(cls):

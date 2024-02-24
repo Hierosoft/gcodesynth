@@ -1,6 +1,22 @@
 #!/usr/bin/env python
+"""
+Play a single G-code command (M300 play tone).
+
+Usage:
+gcodecommand.py M300 P153 S659
+# where 659 is the pitch in Hz, and 153 is length in milliseconds
+#   (default 1ms as per Marlin G-code docs:
+#   <https://marlinfw.org/docs/gcode/M300.html>).
+# NOTE: Counter-intuitively S is Hz, P is ms.
+"""
 import os
 import sys
+
+if __name__ == "__main__":
+    # Allow importing from nearby module if run without pytest
+    TESTS_DIR = os.path.dirname(os.path.realpath(__file__))
+    REPO_DIR = os.path.dirname(TESTS_DIR)
+    sys.path.insert(0, REPO_DIR)
 
 from gcodesynth.gcodeparam import GCodeParam
 
@@ -19,6 +35,8 @@ if not ENABLE_AUDIOGEN:
     print("* audiogen is not available in your installation of Python"
           " {}".format(sys.version))
 
+def echo0(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 if not ENABLE_AUDIOGEN:
     from gcodesynth.gcspyaudio import (
@@ -140,7 +158,7 @@ class GCodeCommand():
     def is_comment(self):
         return (self._comment is not None) and (len(self._params) < 1)
 
-    def play(self):
+    def play(self, log_level=0):
         if not self._ready:
             raise RuntimeError("The command was played before ready.")
         if self.is_comment():
@@ -157,14 +175,25 @@ class GCodeCommand():
             return
         if cmd._v != 300:
             return
-        ms = self.get_value("P")
-        hz = self.get_value("S")
-        print("* play {}ms {}Hz".format(ms, hz))
+        # See <https://marlinfw.org/docs/gcode/M300.html>
+        ms = 1  # default is 1 millisecond as per Marlin G-code docs
+        if self.has_param('P'):  # P is ms *not* pitch
+            ms = self.get_value('P')
+        else:
+            if log_level > 0:
+                echo0("There is no P (ms). Defaulting to {}"
+                      "".format(ms))
+        hz = 260  # default is 260 as per Marlin G-code docs
+        if self.has_param('S'):
+            hz = self.get_value('S')  # S is Hz *not* ms
+        if log_level > 0:
+            echo0("* play {}ms {}Hz".format(ms, hz))
         if not ENABLE_AUDIOGEN:
             # print("  ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
             play_8bit_sine(
                 hz,
                 length=float(ms)/1000,
+                log_level=log_level,
             )
             return
         audiogen.sampler.play(audiogen.beep(
@@ -174,6 +203,12 @@ class GCodeCommand():
 
     def get_value(self, char):
         return self.get_param(char)._v
+
+    def has_param(self, char):
+        for param in self._params:
+            if param._n == char:
+                return True
+        return False
 
     def get_param(self, char):
         if len(char) != 1:
@@ -192,5 +227,7 @@ class GCodeCommand():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
+        start()
         gc = GCodeCommand(" ".join(sys.argv[1:]))
         gc.play()
+        stop()
