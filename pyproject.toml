@@ -1,0 +1,23 @@
+# This file documents the repo structure & requirements
+# in Python's standard way, but installation will have further system package
+# dependencies due to pip having to build pyaudio.
+#
+# To avoid that,
+# install the python3-pyaudio package in your operating system's package
+# manager (See readme.md) instead.
+
+
+[project]
+name = "gcodesynth"
+version = "0.1.0"
+requires-python = ">= 3.4"
+# ^ TODO: find the actual Python version requirement.
+# For requirements, you can specify a git repo
+# (as opposed to a release you've submitted to pypi.org),
+# such as gcodesynth in this case. You can also use ssh:
+#     "gcodesynth@git+ssh://git@github.com/Poikilos/gcodesynth"
+# or use a certain branch:
+#     "gcodesynth@git+https://github.com/Poikilos/gcodesynth.git@main"
+dependencies = [
+    "pyaudio",
+]

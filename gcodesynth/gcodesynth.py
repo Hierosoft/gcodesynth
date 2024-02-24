@@ -36,7 +36,11 @@ except ImportError as ex:
 
 class GCodeSynth():
     def __init__(self):
+        GCodeCommand.start()
         self._commands = []
+
+    def stop(self):
+        GCodeCommand.stop()
 
     def push_line(self, gcode):
         self._commands.append(GCodeCommand(gcode.rstrip("\n\r")))

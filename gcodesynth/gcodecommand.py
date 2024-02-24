@@ -2,6 +2,7 @@
 import os
 import sys
 
+
 MY_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_DIR = MY_DIR
 MODULE_DIR = os.path.join(REPO_DIR, "gcodesynth")
@@ -49,6 +50,20 @@ if not ENABLE_AUDIOGEN:
           " {}".format(sys.version))
 
 
+if not ENABLE_AUDIOGEN:
+    from gcodesynth.gcspyaudio import (
+        play_8bit_sine,
+        start,
+        stop,
+    )
+else:
+    def start():
+        pass
+
+    def stop():
+        pass
+
+
 class GCodeCommand():
     '''
     Attributes:
@@ -72,6 +87,14 @@ class GCodeCommand():
         self._comment = None
         if gcode_raw is not None:
             self.load_line(gcode_raw)
+
+    @staticmethod
+    def start():
+        start()
+
+    @staticmethod
+    def stop():
+        stop()
 
     def get_command(self):
         if len(self._params) < 1:
@@ -167,7 +190,11 @@ class GCodeCommand():
         hz = self.get_value("S")
         print("* play {}ms {}Hz".format(ms, hz))
         if not ENABLE_AUDIOGEN:
-            print("  ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
+            # print("  ENABLE_AUDIOGEN={}".format(ENABLE_AUDIOGEN))
+            play_8bit_sine(
+                hz,
+                float(ms)/1000,
+            )
             return
         audiogen.sampler.play(audiogen.beep(
             frequency=hz,
